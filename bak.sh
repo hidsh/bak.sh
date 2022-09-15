@@ -31,8 +31,8 @@ error()
 {
     echo "USAGE: `basename $0` [-b|-o] file"
     echo "       `basename $0` [-r|-fr] [file.bak|file.orig]"
-    echo "  backup a file to FILE.bak or FILE.orig"
-    echo "  revert a file from FILE.bak or FILE.orig"
+    echo "  Backup a file to FILE.bak or FILE.orig"
+    echo "  Revert a file from FILE.bak or FILE.orig"
     echo ""
     echo "  -b    backup to .bak   (default)"
     echo "  -o    backup to .orig"
@@ -56,10 +56,13 @@ backup()
     done
 
     # backup process
-    if cp $CPOPT $FILENAME $FILENAME$EXT; then
-	echo "  backup: $FILENAME -> $FILENAME$EXT"
-    else { echo "  error occured."; exit 1; }
+    cp $CPOPT $FILENAME $FILENAME$EXT
+    if [ $? -ne 0 ]; then
+        echo "  Error occured.";
+        exit 1;
     fi
+
+    echo "  Backed up: $FILENAME -> $FILENAME$EXT"
 }
 
 # revert from .bak or .orig
@@ -111,7 +114,14 @@ done
 
 # case of args=1, it should be a file name or directory name. otherwise error
 if [ $# -eq 1 ]; then
-    [ `echo $1 | grep '^-'` ] && error || FILENAME=$1
+    arg=$1
+    echo $arg
+    if [ $arg == '.' ]; then
+        FILENAME=`basename \`pwd $arg\``
+        cd ..
+    else
+        [ `echo $arg | grep '^-'` ] && error || FILENAME=$arg
+    fi
 fi
 
 # case of args=2, get option and filename
